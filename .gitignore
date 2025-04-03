@@ -1,0 +1,45 @@
+﻿# Visual Studio & Build Output
+.vs/
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.suo
+*.vscode
+*.sln.ide
+
+# Logs & Crash Reports
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Node.js & React
+ClientApp/node_modules/
+ClientApp/build/
+ClientApp/.cache/
+
+# Environment variables
+.env
+.env.local
+
+# Dependency Caching
+ClientApp/.pnp/
+ClientApp/pnp.js
+
+# IDE settings
+.idea/
+*.iml
+
+# Coverage & Test Results
+coverage/
+TestResults/
+*.coverage
+*.testsettings
+*.vsconfig
+
+# Docker
+docker-compose.override.yml
