@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35825.156 d17.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "The-bpv-tool", "The-bpv-tool\The-bpv-tool.csproj", "{12E6FA75-339A-4C70-A7B9-BA0AAA9EA9DB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPV-app", "BPV-app\BPV-app.csproj", "{9ECA25D5-4948-41D5-AD75-35BBFA90D21E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{12E6FA75-339A-4C70-A7B9-BA0AAA9EA9DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{12E6FA75-339A-4C70-A7B9-BA0AAA9EA9DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{12E6FA75-339A-4C70-A7B9-BA0AAA9EA9DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{12E6FA75-339A-4C70-A7B9-BA0AAA9EA9DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9ECA25D5-4948-41D5-AD75-35BBFA90D21E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9ECA25D5-4948-41D5-AD75-35BBFA90D21E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9ECA25D5-4948-41D5-AD75-35BBFA90D21E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9ECA25D5-4948-41D5-AD75-35BBFA90D21E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {BCDCD0EE-417A-4D07-891B-755C27736AD3}
+		SolutionGuid = {DD409760-3DE2-4942-85CD-A75E4C07A09C}
 	EndGlobalSection
 EndGlobal
