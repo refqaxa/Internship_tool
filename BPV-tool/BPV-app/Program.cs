@@ -1,3 +1,6 @@
+using BPV_app.Data;
+using Microsoft.EntityFrameworkCore;
+
 namespace BPV_app
 {
     public class Program
@@ -18,6 +21,9 @@ namespace BPV_app
                           .AllowAnyMethod();
                 });
             });
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
             var app = builder.Build();
 
