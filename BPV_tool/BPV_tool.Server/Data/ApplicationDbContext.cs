@@ -5,7 +5,7 @@ namespace BPV_app.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public DbSet<User> Users { get; set; }
+        public DbSet<AppUser> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<Models.File> Files { get; set; }
         public DbSet<Feedback> Feedback { get; set; }
@@ -17,8 +17,53 @@ namespace BPV_app.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configure optional properties, relationships, constraints, etc.
             base.OnModelCreating(modelBuilder);
+
+            // Relationship: Student -> BPVProcess
+            modelBuilder.Entity<BPVProcess>()
+                .HasOne(p => p.Student)
+                .WithMany(u => u.StartedProcesses)
+                .HasForeignKey(p => p.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Relationship: Supervisor -> BPVProcess
+            modelBuilder.Entity<BPVProcess>()
+                .HasOne(p => p.Supervisor)
+                .WithMany(u => u.SupervisedProcesses)
+                .HasForeignKey(p => p.SupervisorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Feedback>()
+                .HasOne(f => f.Reviewer)
+                .WithMany(u => u.GivenFeedback)
+                .HasForeignKey(f => f.ReviewerId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Models.File>()
+                .HasOne(f => f.Student)
+                .WithMany(u => u.UploadedFiles)
+                .HasForeignKey(f => f.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BPVProcess>()
+                .HasOne(p => p.Student)
+                .WithMany(u => u.StartedProcesses)
+                .HasForeignKey(p => p.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BPVProcess>()
+                .HasOne(p => p.Supervisor)
+                .WithMany(u => u.SupervisedProcesses)
+                .HasForeignKey(p => p.SupervisorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BPVApproval>()
+                .HasOne(a => a.Reviewer)
+                .WithMany(u => u.BPVApprovals)
+                .HasForeignKey(a => a.ReviewerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure optional properties, relationships, constraints, etc.
+            // base.OnModelCreating(modelBuilder);
         }
     }
 

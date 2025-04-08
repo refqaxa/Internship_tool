@@ -2,17 +2,18 @@
 {
     public class Log
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
-        public int StudentId { get; set; }
-        public User Student { get; set; }
+        public Guid StudentId { get; set; }
+        public AppUser Student { get; set; }
 
-        public int BPVProcessId { get; set; }
+        public Guid BPVProcessId { get; set; }
         public BPVProcess BPVProcess { get; set; }
 
         public DateTime Date { get; set; }
-        public int Hours { get; set; }
+        public double Hours { get; set; }
         public string Activity { get; set; }
     }
+
 
 }

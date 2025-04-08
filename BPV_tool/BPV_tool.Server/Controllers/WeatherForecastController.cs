@@ -30,3 +30,16 @@ public class WeatherForecastController : ControllerBase
         .ToArray();
     }
 }
+
+// example api call:
+[Route("api/[controller]")]
+[ApiController]
+public class WeatherController : ControllerBase
+{
+    [HttpGet]
+    public IActionResult GetWeather()
+    {
+        return Ok(new { Temperature = "20°C", Condition = "Sunny" });
+    }
+}
+
