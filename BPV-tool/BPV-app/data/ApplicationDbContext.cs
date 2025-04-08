@@ -7,7 +7,7 @@ namespace BPV_app.Data
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
-        public DbSet<File> Files { get; set; }
+        public DbSet<Models.File> Files { get; set; }
         public DbSet<Feedback> Feedback { get; set; }
         public DbSet<BPVProcess> BPVProcesses { get; set; }
         public DbSet<BPVApproval> BPVApprovals { get; set; }
