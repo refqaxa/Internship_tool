@@ -9,6 +9,16 @@ namespace BPV_app
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowReactDev", policy =>
+                {
+                    policy.WithOrigins("http://localhost:3000")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -23,7 +33,7 @@ namespace BPV_app
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            app.UseCors("AllowReactDev");
             app.UseAuthorization();
 
             app.MapControllerRoute(
