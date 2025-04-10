@@ -1,4 +1,5 @@
 ﻿using BPV_app.Models;
+using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
 
 namespace BPV_app.Data
@@ -33,6 +34,7 @@ namespace BPV_app.Data
                 .HasForeignKey(p => p.SupervisorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Restrict relational deleting
             modelBuilder.Entity<Feedback>()
                 .HasOne(f => f.Reviewer)
                 .WithMany(u => u.GivenFeedback)
@@ -61,6 +63,33 @@ namespace BPV_app.Data
                 .WithMany(u => u.BPVApprovals)
                 .HasForeignKey(a => a.ReviewerId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Seed roles
+            var adminRoleId = Guid.NewGuid();
+            var teacherRoleId = Guid.NewGuid();
+            var studentRoleId = Guid.NewGuid();
+
+            modelBuilder.Entity<Role>().HasData(
+                new Role { Id = adminRoleId, RoleName = "Admin" },
+                new Role { Id = teacherRoleId, RoleName = "Teacher" },
+                new Role { Id = studentRoleId, RoleName = "Student" }
+            );
+
+            // Seed admin user
+            var adminUserId = Guid.NewGuid();
+            var passwordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123");
+
+            modelBuilder.Entity<AppUser>().HasData(new AppUser
+            {
+                Id = adminUserId,
+                FirstName = "Admin",
+                MiddleName = null,
+                LastName = "User",
+                Email = "admin@bpv.local",
+                PasswordHash = passwordHash,
+                RoleId = adminRoleId
+            });
+
 
         }
     }

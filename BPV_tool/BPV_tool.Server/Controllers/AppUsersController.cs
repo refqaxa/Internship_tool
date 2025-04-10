@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BPV_app.Data;
 using BPV_app.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Collections;
 
 namespace BPV_tool.Server.Controllers
 {
@@ -21,40 +23,97 @@ namespace BPV_tool.Server.Controllers
             _context = context;
         }
 
-        // GET: api/AppUsers
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<AppUser>>> GetUsers()
+        // POST: api/AppUsers/login
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            return await _context.Users.ToListAsync();
+            var user = await _context.Users.Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Email == request.Email);
+
+            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+                return Unauthorized("Invalid email or password.");
+
+            return Ok(new
+            {
+                user.Id,
+                user.FirstName,
+                user.LastName,
+                user.Email,
+                Role = user.Role.RoleName
+            });
         }
 
-        // GET: api/AppUsers/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<AppUser>> GetAppUser(Guid id)
+        public class LoginRequest
         {
-            var appUser = await _context.Users.FindAsync(id);
-
-            if (appUser == null)
-            {
-                return NotFound();
-            }
-
-            return appUser;
+            public string Email { get; set; }
+            public string Password { get; set; }
         }
 
-        // PUT: api/AppUsers/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAppUser(Guid id, AppUser appUser)
+
+        // GET: api/AppUsers/allUsers
+        [HttpGet("AllUsers")]
+        [Authorize(Roles = "admin")]
+        public async Task<ActionResult<IEnumerable<object>>> GetUsersWithRoles()
         {
-            if (id != appUser.Id)
+            var users = await _context.Users.Include(u => u.Role)
+                .Select(u => new {
+                    u.Id,
+                    FullName = $"{u.FirstName} {u.LastName}",
+                    u.Email,
+                    Role = u.Role.RoleName
+                }).ToListAsync();
+
+            return Ok(users);
+        }
+
+
+        // GET: api/AppUsers/Roles
+        [HttpGet("Roles")]
+        public async Task<ActionResult<IEnumerable<object>>> CreateUser()
+        {
+            var roles = await _context.Roles.ToListAsync();
+
+            return Ok(roles);
+        }
+
+        // POST: api/AppUsers/CreateUser
+        [HttpPost("CreateUser")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> CreateUser(AppUser newUser)
+        {
+            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Id == newUser.RoleId);
+            if (role == null) return BadRequest("Invalid role.");
+
+            // Check for existing email
+            if (await _context.Users.AnyAsync(u => u.Email == newUser.Email))
+                return BadRequest("Email already exists.");
+
+            newUser.Id = Guid.NewGuid();
+            newUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newUser.PasswordHash);
+            _context.Users.Add(newUser); try
             {
-                return BadRequest();
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
             }
 
-            _context.Entry(appUser).State = EntityState.Modified;
+            return NoContent();
+        }
 
-            try
+
+        // PUT: api/AppUsers/UpdateRole/{id}
+        [HttpPut("UpdateRole/{id}")]
+        public async Task<IActionResult> UpdateUserRole(Guid id, [FromBody] Guid newRoleId)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound("User not found.");
+
+            var role = await _context.Roles.FindAsync(newRoleId);
+            if (role == null) return BadRequest("Invalid role ID.");
+
+            user.RoleId = newRoleId; try
             {
                 await _context.SaveChangesAsync();
             }
@@ -73,19 +132,10 @@ namespace BPV_tool.Server.Controllers
             return NoContent();
         }
 
-        // POST: api/AppUsers
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<AppUser>> PostAppUser(AppUser appUser)
-        {
-            _context.Users.Add(appUser);
-            await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAppUser", new { id = appUser.Id }, appUser);
-        }
-
-        // DELETE: api/AppUsers/5
+        // DELETE: api/DeleteUser/
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteAppUser(Guid id)
         {
             var appUser = await _context.Users.FindAsync(id);
@@ -93,10 +143,8 @@ namespace BPV_tool.Server.Controllers
             {
                 return NotFound();
             }
-
             _context.Users.Remove(appUser);
             await _context.SaveChangesAsync();
-
             return NoContent();
         }
 

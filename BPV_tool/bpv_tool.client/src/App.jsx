@@ -13,53 +13,53 @@ function App() {
     
 }
 
-//function App() {
-//    const [forecasts, setForecasts] = useState();
+
+//// Update user usage:
+//await fetch('/api/appusers/create-user', {
+//    method: 'POST',
+//    headers: { 'Content-Type': 'application/json' },
+//    body: JSON.stringify({
+//        firstName: 'John',
+//        lastName: 'Doe',
+//        email: 'john@example.com',
+//        passwordHash: 'John@123',
+//        roleId: 'role-guid-here'
+//    })
+//});
+
+//// Login usage:
+//const response = await fetch('/api/AppUsers/Login', {
+//    method: 'POST',
+//    headers: { 'Content-Type': 'application/json' },
+//    body: JSON.stringify({ email: 'email', password: '' })
+//});
+//const data = await response.json();
+//console.log(user);
+//// Handle login (in a real-world scenario, you would store a JWT token for further requests)
+
+//// Roles dropdown
+//function RoleDropdown({ onChange }) {
+//    const [roles, setRoles] = useState([]);
 
 //    useEffect(() => {
-//        populateWeatherData();
+//        fetch("/api/appusers/roles")
+//            .then(res => res.json())
+//            .then(data => setRoles(data))
+//            .catch(err => console.error("Failed to fetch roles", err));
 //    }, []);
 
-//    const contents = forecasts === undefined
-//        ? <p><em>Loading... Please refresh once the ASP.NET backend has started.</em></p>
-//        : <table className="table table-striped" aria-labelledby="tableLabel">
-//            <thead>
-//                <tr>
-//                    <th>Date</th>
-//                    <th>Temp. (C)</th>
-//                    <th>Temp. (F)</th>
-//                    <th>Summary</th>
-//                </tr>
-//            </thead>
-//            <tbody>
-//                {forecasts.map(forecast =>
-//                    <tr key={forecast.date}>
-//                        <td>{forecast.date}</td>
-//                        <td>{forecast.temperatureC}</td>
-//                        <td>{forecast.temperatureF}</td>
-//                        <td>{forecast.summary}</td>
-//                    </tr>
-//                )}
-//            </tbody>
-//        </table>;
-
 //    return (
-
-//        <div>
-//            <h1 id="tableLabel">Weather forecast</h1>
-//            <p>This component demonstrates fetching data from the server.</p>
-//            {contents}
-//            Welcome naar de beste BPV tool web app
-//        </div>
+//        <select onChange={e => onChange(e.target.value)}>
+//            <option value="">-- Select Role --</option>
+//            {roles.map(role => (
+//                <option key={role.id} value={role.id}>
+//                    {role.roleName}
+//                </option>
+//            ))}
+//        </select>
 //    );
-
-//    async function populateWeatherData() {
-//        const response = await fetch('weatherforecast');
-//        if (response.ok) {
-//            const data = await response.json();
-//            setForecasts(data);
-//        }
-//    }
 //}
+
+
 
 export default App;
