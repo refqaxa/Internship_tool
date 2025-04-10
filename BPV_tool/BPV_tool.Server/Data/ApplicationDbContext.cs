@@ -62,8 +62,6 @@ namespace BPV_app.Data
                 .HasForeignKey(a => a.ReviewerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Configure optional properties, relationships, constraints, etc.
-            // base.OnModelCreating(modelBuilder);
         }
     }
 
