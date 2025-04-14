@@ -1,17 +1,26 @@
 import { useEffect, useState } from 'react';
 import './App.css';
+import Navbar from './components/navbar.jsx';
+import Footer from './components/footer.jsx';
 import login from './login.jsx'
 
 function App() {
 
     return (
-
-        <div>
-            Welcome naar de beste BPV tool web app 
-        </div>
+        <>
+          <Navbar />
+          <div className="container my-4">
+            <h1>Welcome naar de beste BPV tool web app</h1>
+          </div>
+          <Footer />
+        </>
     );
     
 }
+
+
+export default App;
+
 
 
 //// Update user usage:
@@ -60,6 +69,3 @@ function App() {
 //    );
 //}
 
-
-
-export default App;

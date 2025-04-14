@@ -1,9 +1,19 @@
-﻿#root {
-    max-width: 1280px;
+﻿
+html, body, #root {
+    height: 100%;
+    width: 100%;
     margin: 0 auto;
     padding: 2rem;
-    text-align: center;
+    box-sizing: border-box;
+    border-radius: 10px;
 }
+
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
 
 th, td {
     padding-left: 1rem;
