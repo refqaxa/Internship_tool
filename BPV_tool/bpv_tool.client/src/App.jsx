@@ -2,13 +2,26 @@ import { useEffect, useState } from 'react';
 import './App.css';
 import Navbar from './components/navbar.jsx';
 import Footer from './components/footer.jsx';
-import login from './login.jsx'
+
+import { Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Login from './views/Login';
+import Dashboard from './views/Dashboard';
+import AdminPanel from './views/AdminPanel';
+import Profile from './views/Profile';
+//import login from './login.jsx'
 
 function App() {
 
     return (
         <>
-          <Navbar />
+            <Navbar />
+            <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/admin" element={<AdminPanel />} />
+                <Route path="/profile" element={<Profile />} />
+            </Routes>
           <div className="container my-4">
             <h1>Welcome naar de beste BPV tool web app</h1>
           </div>

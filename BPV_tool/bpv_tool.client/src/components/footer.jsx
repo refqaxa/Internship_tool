@@ -7,7 +7,7 @@ export default function Footer() {
             <div className="footer-items">
                 <img src={logo} alt="Logo" style={{ height: "40px" }} />
                 <div className="vl"></div>
-                <small className="px-3">© 2025 BPV Tool. All rights reserved.</small>
+                <small className="px-3">© 2025 BPV Tool. All rights reserved. Refqa Bashir, Mika</small>
             </div>
         </footer>
     );
