@@ -1,4 +1,4 @@
-//  handle session with localStorage, keep the user logged in across page refreshes.
+//  handle login and out + session with localStorage that keeps the user logged in across page refreshes.
 
 import { createContext, useState, useEffect } from 'react';
 

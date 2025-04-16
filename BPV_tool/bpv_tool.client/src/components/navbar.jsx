@@ -9,10 +9,13 @@ export default function Navbar() {
 
     const handleLogout = () => {
         logout();
-        navigate('/login');
+        navigate('views/login');
     };
 
+    // console.log("Current user:", user);
+
     return (
+
         <nav className="navbar navbar-expand-lg navbar-light bg-light px-5 py-3 shadow rounded">
             <Link className="navbar-brand" to="/">
                 <img src={logo} alt="AVENTUS logo" style={{ height: "40px" }} />
@@ -24,17 +27,29 @@ export default function Navbar() {
                 <ul className="navbar-nav ms-auto">
                     {user && (
                         <>
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/dashboard">Dashboard</Link>
-                            </li>
-                            {user.Role === 'admin' && (
+                            {user.role === 'Admin' && (
                                 <li className="nav-item">
-                                    <Link className="nav-link" to="/admin">Admin Panel</Link>
+                                    <Link className="nav-link" to="/adminpanel">Admin Panel</Link>
                                 </li>
                             )}
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/profile">Profile</Link>
-                            </li>
+                            {user.role === 'Teacher' && (
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/teacherdashboard">Dashboard</Link>
+                                </li>
+                            )}
+                            {user.role === 'Student' && (
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/studentdashboard">Dashboard</Link>
+                                </li>
+                            )}
+                            {user.role === 'Student' && (
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/logbook">Logbook</Link>
+                                </li>
+                            )}
+                            <span className="navbar-text me-3 text-muted font-weight-bold">
+                                Logged in als: <strong>{user.role}</strong>
+                            </span>
                             <li className="nav-item">
                                 <button className="nav-link btn btn-link text-warning" onClick={handleLogout}>Logout</button>
                             </li>

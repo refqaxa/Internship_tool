@@ -4,27 +4,31 @@ import Navbar from './components/navbar.jsx';
 import Footer from './components/footer.jsx';
 
 import { Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
 import Login from './views/Login';
-import Dashboard from './views/Dashboard';
+import TeacherDashboard from './views/Teacherdashboard';
+import StudentDashboard from './views/Studentdashboard';
 import AdminPanel from './views/AdminPanel';
-import Profile from './views/Profile';
-//import login from './login.jsx'
+import Logbook from './views/Logbook';
 
 function App() {
 
     return (
         <>
             <Navbar />
+
             <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/admin" element={<AdminPanel />} />
-                <Route path="/profile" element={<Profile />} />
+                <Route path="/" element={
+                    <div className="container my-4">
+                        <h1>Welcome naar de beste BPV tool web app</h1>
+                    </div>
+                } />
+                <Route path="/views/adminpanel" element={<AdminPanel />} />
+                <Route path="/views/Teacherdashboard" element={<TeacherDashboard />} />
+                <Route path="/views/Studentdashboard" element={<StudentDashboard />} />
+                <Route path="/views/logbook" element={<Logbook />} />
+                <Route path="/views/login" element={<Login />} />
             </Routes>
-          <div className="container my-4">
-            <h1>Welcome naar de beste BPV tool web app</h1>
-          </div>
+            
           <Footer />
         </>
     );
@@ -48,16 +52,6 @@ export default App;
 //        roleId: 'role-guid-here'
 //    })
 //});
-
-//// Login usage:
-//const response = await fetch('/api/AppUsers/Login', {
-//    method: 'POST',
-//    headers: { 'Content-Type': 'application/json' },
-//    body: JSON.stringify({ email: 'email', password: '' })
-//});
-//const data = await response.json();
-//console.log(user);
-//// Handle login (in a real-world scenario, you would store a JWT token for further requests)
 
 //// Roles dropdown
 //function RoleDropdown({ onChange }) {
