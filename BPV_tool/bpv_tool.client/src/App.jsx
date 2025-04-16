@@ -9,6 +9,7 @@ import TeacherDashboard from './views/Teacherdashboard';
 import StudentDashboard from './views/Studentdashboard';
 import AdminPanel from './views/AdminPanel';
 import Logbook from './views/Logbook';
+import CreateUser from './views/CreateUser.jsx';
 
 function App() {
 
@@ -26,6 +27,7 @@ function App() {
                 <Route path="/views/Teacherdashboard" element={<TeacherDashboard />} />
                 <Route path="/views/Studentdashboard" element={<StudentDashboard />} />
                 <Route path="/views/logbook" element={<Logbook />} />
+                <Route path="/views/createuser" element={<CreateUser />} />
                 <Route path="/views/login" element={<Login />} />
             </Routes>
             

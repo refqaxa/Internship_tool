@@ -49,6 +49,14 @@ namespace BPV_tool.Server.Controllers
             public string Password { get; set; }
         }
 
+        // GET: api/AppUsers/Roles
+        [HttpGet("Roles")]
+        public async Task<ActionResult<IEnumerable<object>>> CreateUser()
+        {
+            var roles = await _context.Roles.ToListAsync();
+
+            return Ok(roles);
+        }
 
         // GET: api/AppUsers/allUsers
         [HttpGet("AllUsers")]
@@ -64,16 +72,6 @@ namespace BPV_tool.Server.Controllers
                 }).ToListAsync();
 
             return Ok(users);
-        }
-
-
-        // GET: api/AppUsers/Roles
-        [HttpGet("Roles")]
-        public async Task<ActionResult<IEnumerable<object>>> CreateUser()
-        {
-            var roles = await _context.Roles.ToListAsync();
-
-            return Ok(roles);
         }
 
         // POST: api/AppUsers/CreateUser

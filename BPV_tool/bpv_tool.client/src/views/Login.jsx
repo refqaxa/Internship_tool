@@ -32,8 +32,8 @@ export default function Login() {
     };
 
     return (
-        <div className="container my-5">
-            <h2>Login</h2>
+        <div className="container my-5 justify-content-center">
+            <h1>Welkom terug, Login!</h1>
             {error && <div className="alert alert-danger">{error}</div>}
             <form onSubmit={handleSubmit}>
                 <div className="mb-3">

@@ -28,24 +28,29 @@ export default function Navbar() {
                     {user && (
                         <>
                             {user.role === 'Admin' && (
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="/adminpanel">Admin Panel</Link>
-                                </li>
+                                <>
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/views/adminpanel">Admin Panel</Link>
+                                    </li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/views/createuser">Niewue gebruiker</Link>
+                                    </li>
+                                </>
                             )}
                             {user.role === 'Teacher' && (
                                 <li className="nav-item">
-                                    <Link className="nav-link" to="/teacherdashboard">Dashboard</Link>
+                                    <Link className="nav-link" to="/views/teacherdashboard">Dashboard</Link>
                                 </li>
                             )}
                             {user.role === 'Student' && (
+                                <>
                                 <li className="nav-item">
-                                    <Link className="nav-link" to="/studentdashboard">Dashboard</Link>
+                                    <Link className="nav-link" to="/views/studentdashboard">Dashboard</Link>
                                 </li>
-                            )}
-                            {user.role === 'Student' && (
                                 <li className="nav-item">
-                                    <Link className="nav-link" to="/logbook">Logbook</Link>
+                                    <Link className="nav-link" to="/views/logbook">Logbook</Link>
                                 </li>
+                                </>
                             )}
                             <span className="navbar-text me-3 text-muted font-weight-bold">
                                 Logged in als: <strong>{user.role}</strong>
