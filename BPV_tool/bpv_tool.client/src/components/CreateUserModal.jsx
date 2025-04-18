@@ -10,7 +10,7 @@ export default function CreateUserModal({ show, onClose, onUserCreated }) {
         middleName: '',
         lastName: '',
         email: '',
-        password: '',
+        passwordHash: '',
         roleId: ''
     });
     const [error, setError] = useState('');
@@ -52,6 +52,7 @@ export default function CreateUserModal({ show, onClose, onUserCreated }) {
                 onUserCreated(); // refresh users
             } else {
                 const msg = await res.text();
+                console.log(res)
                 setError(msg || 'Failed to create user.');
             }
         } catch {

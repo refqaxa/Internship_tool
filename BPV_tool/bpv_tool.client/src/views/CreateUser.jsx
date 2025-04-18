@@ -10,7 +10,7 @@ export default function CreateUser() {
         middleName: '',
         lastName: '',
         email: '',
-        password: '',
+        passwordHash: '',
         roleId: ''
     });
     const [error, setError] = useState('');
@@ -25,7 +25,8 @@ export default function CreateUser() {
             try {
                 const response = await fetch('/api/AppUsers/Roles', {
                     headers: {
-                        Authorization: `Bearer ${token}`
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     }
                 });
                 const data = await response.json();
@@ -61,7 +62,7 @@ export default function CreateUser() {
             });
 
             if (res.ok) {
-                navigate('/admin'); // Back to admin panel
+                navigate('/views/adminpanel');
             } else {
                 const msg = await res.text();
                 setError(msg || 'Failed to create user.');

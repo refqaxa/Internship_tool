@@ -83,7 +83,7 @@ namespace BPV_tool.Server.Controllers
 
         // GET: api/AppUsers/allUsers
         [HttpGet("AllUsers")]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<object>>> GetUsersWithRoles()
         {
             var users = await _context.Users.Include(u => u.Role)
@@ -99,8 +99,9 @@ namespace BPV_tool.Server.Controllers
 
         // POST: api/AppUsers/CreateUser
         [HttpPost("CreateUser")]
-        [Authorize(Roles = "admin")]
-        public async Task<IActionResult> CreateUser([FromBody] AppUser newUser)
+        [Authorize(Roles = "Admin")]
+        // Task: Instead of binding the entire AppUser model directly in your controller, create a CreateUserDTO to explicitly define the expected input. This prevents over-posting and reduces bugs.
+        public async Task<IActionResult> CreateUser(AppUser newUser)
         {
             var role = await _context.Roles.FirstOrDefaultAsync(r => r.Id == newUser.RoleId);
             if (role == null) return BadRequest("Invalid role.");
@@ -156,7 +157,7 @@ namespace BPV_tool.Server.Controllers
 
         // DELETE: api/DeleteUser/
         [HttpDelete("{id}")]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAppUser(Guid id)
         {
             var appUser = await _context.Users.FindAsync(id);
