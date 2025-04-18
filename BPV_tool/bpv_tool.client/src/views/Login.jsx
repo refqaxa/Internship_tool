@@ -24,7 +24,8 @@ export default function Login() {
             }
 
             const data = await response.json();
-            login(data);
+
+            login(data.user, data.token);
             navigate('/');
         } catch (err) {
             setError(err.message);

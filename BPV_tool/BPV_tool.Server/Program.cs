@@ -1,4 +1,6 @@
-
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using BPV_app.Data;
 using Microsoft.EntityFrameworkCore;
 using BPV_tool.Server.Controllers;
@@ -11,10 +13,26 @@ namespace BPV_tool.Server
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Read JWT Key
+            var jwtKey = builder.Configuration["Jwt:Key"];
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = false;
+                    options.SaveToken = true;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        ValidateLifetime = true
+                    };
+                });
 
+            // Add services to the container.
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            builder.Services.AddAuthorization();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -33,7 +51,7 @@ namespace BPV_tool.Server
             }
 
             app.UseHttpsRedirection();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
 

@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BPV_app.Data;
 using BPV_app.Models;
 using Microsoft.AspNetCore.Authorization;
-using System.Collections;
 
 namespace BPV_tool.Server.Controllers
 {
@@ -17,10 +15,12 @@ namespace BPV_tool.Server.Controllers
     public class AppUsersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public AppUsersController(ApplicationDbContext context)
+        public AppUsersController(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         // POST: api/AppUsers/login
@@ -33,13 +33,36 @@ namespace BPV_tool.Server.Controllers
             if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 return Unauthorized("Invalid email or password.");
 
+            // JWT Key from config
+            var key = _configuration["Jwt:Key"];
+            var keyBytes = Encoding.UTF8.GetBytes(key);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role.RoleName)
+            }),
+                Expires = DateTime.UtcNow.AddHours(24),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var jwt = tokenHandler.WriteToken(token);
+
             return Ok(new
             {
-                user.Id,
-                user.FirstName,
-                user.LastName,
-                user.Email,
-                Role = user.Role.RoleName
+                token = jwt,
+                user = new
+                {
+                    user.Id,
+                    user.FirstName,
+                    user.LastName,
+                    user.Email,
+                    Role = user.Role.RoleName
+                }
             });
         }
 
@@ -77,7 +100,7 @@ namespace BPV_tool.Server.Controllers
         // POST: api/AppUsers/CreateUser
         [HttpPost("CreateUser")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> CreateUser(AppUser newUser)
+        public async Task<IActionResult> CreateUser([FromBody] AppUser newUser)
         {
             var role = await _context.Roles.FirstOrDefaultAsync(r => r.Id == newUser.RoleId);
             if (role == null) return BadRequest("Invalid role.");
