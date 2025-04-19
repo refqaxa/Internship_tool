@@ -129,8 +129,8 @@ namespace BPV_tool.Server.Controllers
             return NoContent();
         }
 
-        // PUT: api/AppUsers/UpdateRole/{id}
-        [HttpPut("UpdateRole/{id}")]
+        // PUT: api/AppUsers/UpdateUserRole/{id}
+        [HttpPut("UpdateUserRole/{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateUserRole(Guid id, [FromBody] UpdateUserRoleDTO dto)
         {
@@ -158,10 +158,10 @@ namespace BPV_tool.Server.Controllers
             return NoContent();
         }
 
-        // DELETE: api/AppUsers/DeleteAppUser/{id}
+        // DELETE: api/AppUsers/DeleteUser/{id}
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteAppUser(Guid id)
+        public async Task<IActionResult> DeleteUser(Guid id)
         {
             var appUser = await _context.Users.FindAsync(id);
             if (appUser == null)

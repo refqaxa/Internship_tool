@@ -40,7 +40,7 @@ export default function AdminPanel() {
 
     const handleRoleChange = async (userId, newRoleId) => {
         try {
-            await axios.put(`/api/AppUsers/UpdateRole/${userId}`, newRoleId, {
+            await axios.put(`/api/AppUsers/UpdateUserRole/${userId}`, { newRoleId }, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             toast.success('Role updated');
@@ -55,7 +55,7 @@ export default function AdminPanel() {
         if (!confirmDelete) return;
 
         try {
-            await axios.delete(`/api/AppUsers/${userId}`, {
+            await axios.delete(`/api/AppUsers/DeleteUser/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             toast.success('User deleted');
