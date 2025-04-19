@@ -10,7 +10,7 @@ export default function CreateUser() {
         middleName: '',
         lastName: '',
         email: '',
-        passwordHash: '',
+        password: '',
         roleId: ''
     });
     const [error, setError] = useState('');

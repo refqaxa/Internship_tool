@@ -75,7 +75,7 @@ export default function AdminPanel() {
                 show={showCreateModal}
                 onClose={() => setShowCreateModal(false)}
                 token={token}
-                fetchData={fetchData}
+                onUserCreated={fetchData}
             />
 
             <div className="d-flex justify-content-between align-items-center mb-4">

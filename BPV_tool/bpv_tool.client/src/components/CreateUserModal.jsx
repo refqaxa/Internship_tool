@@ -10,7 +10,7 @@ export default function CreateUserModal({ show, onClose, onUserCreated }) {
         middleName: '',
         lastName: '',
         email: '',
-        passwordHash: '',
+        password: '',
         roleId: ''
     });
     const [error, setError] = useState('');
@@ -49,7 +49,7 @@ export default function CreateUserModal({ show, onClose, onUserCreated }) {
             if (res.ok) {
                 toast.success('User created!');
                 onClose();
-                onUserCreated(); // refresh users
+                fetchData(); // refresh users
             } else {
                 const msg = await res.text();
                 console.log(res)

@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using BPV_app.Data;
 using BPV_app.Models;
 using Microsoft.AspNetCore.Authorization;
+using BPV_tool.Server.DTOs.Users;
 
 namespace BPV_tool.Server.Controllers
 {
@@ -25,7 +26,7 @@ namespace BPV_tool.Server.Controllers
 
         // POST: api/AppUsers/login
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginRequestDTO request)
         {
             var user = await _context.Users.Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.Email == request.Email);
@@ -33,7 +34,6 @@ namespace BPV_tool.Server.Controllers
             if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 return Unauthorized("Invalid email or password.");
 
-            // JWT Key from config
             var key = _configuration["Jwt:Key"];
             var keyBytes = Encoding.UTF8.GetBytes(key);
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -41,10 +41,10 @@ namespace BPV_tool.Server.Controllers
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role.RoleName)
-            }),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Email, user.Email),
+                    new Claim(ClaimTypes.Role, user.Role.RoleName)
+                }),
                 Expires = DateTime.UtcNow.AddHours(24),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature)
             };
@@ -52,31 +52,32 @@ namespace BPV_tool.Server.Controllers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var jwt = tokenHandler.WriteToken(token);
 
-            return Ok(new
+            var response = new LoginResponseDTO
             {
-                token = jwt,
-                user = new
+                Token = jwt,
+                User = new UserSummaryDTO
                 {
-                    user.Id,
-                    user.FirstName,
-                    user.LastName,
-                    user.Email,
+                    Id = user.Id,
+                    FullName = $"{user.FirstName} {user.LastName}",
+                    Email = user.Email,
                     Role = user.Role.RoleName
                 }
-            });
-        }
+            };
 
-        public class LoginRequest
-        {
-            public string Email { get; set; }
-            public string Password { get; set; }
+            return Ok(response);
         }
 
         // GET: api/AppUsers/Roles
         [HttpGet("Roles")]
-        public async Task<ActionResult<IEnumerable<object>>> CreateUser()
+        public async Task<ActionResult<IEnumerable<RoleDTO>>> GetRoles()
         {
-            var roles = await _context.Roles.ToListAsync();
+            var roles = await _context.Roles
+                .Select(r => new RoleDTO
+                {
+                    Id = r.Id,
+                    RoleName = r.RoleName
+                })
+                .ToListAsync();
 
             return Ok(roles);
         }
@@ -84,13 +85,14 @@ namespace BPV_tool.Server.Controllers
         // GET: api/AppUsers/allUsers
         [HttpGet("AllUsers")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<IEnumerable<object>>> GetUsersWithRoles()
+        public async Task<ActionResult<IEnumerable<UserSummaryDTO>>> GetUsersWithRoles()
         {
             var users = await _context.Users.Include(u => u.Role)
-                .Select(u => new {
-                    u.Id,
+                .Select(u => new UserSummaryDTO
+                {
+                    Id = u.Id,
                     FullName = $"{u.FirstName} {u.LastName}",
-                    u.Email,
+                    Email = u.Email,
                     Role = u.Role.RoleName
                 }).ToListAsync();
 
@@ -100,73 +102,74 @@ namespace BPV_tool.Server.Controllers
         // POST: api/AppUsers/CreateUser
         [HttpPost("CreateUser")]
         [Authorize(Roles = "Admin")]
-        // Task: Instead of binding the entire AppUser model directly in your controller, create a CreateUserDTO to explicitly define the expected input. This prevents over-posting and reduces bugs.
-        public async Task<IActionResult> CreateUser(AppUser newUser)
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserDTO dto)
         {
-            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Id == newUser.RoleId);
-            if (role == null) return BadRequest("Invalid role.");
+            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Id == dto.RoleId);
+            if (role == null)
+                return BadRequest("Invalid role.");
 
-            // Check for existing email
-            if (await _context.Users.AnyAsync(u => u.Email == newUser.Email))
+            if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
                 return BadRequest("Email already exists.");
 
-            newUser.Id = Guid.NewGuid();
-            newUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newUser.PasswordHash);
-            _context.Users.Add(newUser); try
+            var newUser = new AppUser
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                throw;
-            }
+                Id = Guid.NewGuid(),
+                FirstName = dto.FirstName,
+                MiddleName = dto.MiddleName,
+                LastName = dto.LastName,
+                Email = dto.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+                RoleId = dto.RoleId
+                // Role = role
+            };
+
+            _context.Users.Add(newUser);
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-
         // PUT: api/AppUsers/UpdateRole/{id}
         [HttpPut("UpdateRole/{id}")]
-        public async Task<IActionResult> UpdateUserRole(Guid id, [FromBody] Guid newRoleId)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateUserRole(Guid id, [FromBody] UpdateUserRoleDTO dto)
         {
             var user = await _context.Users.FindAsync(id);
-            if (user == null) return NotFound("User not found.");
+            if (user == null)
+                return NotFound("User not found.");
 
-            var role = await _context.Roles.FindAsync(newRoleId);
-            if (role == null) return BadRequest("Invalid role ID.");
+            var role = await _context.Roles.FindAsync(dto.NewRoleId);
+            if (role == null)
+                return BadRequest("Invalid role ID.");
 
-            user.RoleId = newRoleId; try
+            user.RoleId = dto.NewRoleId;
+
+            try
             {
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
                 if (!AppUserExists(id))
-                {
                     return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
 
             return NoContent();
         }
 
-
-        // DELETE: api/DeleteUser/
+        // DELETE: api/AppUsers/DeleteAppUser/{id}
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAppUser(Guid id)
         {
             var appUser = await _context.Users.FindAsync(id);
             if (appUser == null)
-            {
                 return NotFound();
-            }
+
             _context.Users.Remove(appUser);
             await _context.SaveChangesAsync();
+
             return NoContent();
         }
 

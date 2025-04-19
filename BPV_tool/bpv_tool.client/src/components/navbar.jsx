@@ -52,7 +52,7 @@ export default function Navbar() {
                                 </li>
                                 </>
                             )}
-                            <span className="navbar-text me-3 text-muted font-weight-bold">
+                            <span className="navbar-text me-3 text-muted font-weight-bold text-success">
                                 Logged in als: <strong>{user.role}</strong>
                             </span>
                             <li className="nav-item">
