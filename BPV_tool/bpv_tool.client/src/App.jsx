@@ -19,7 +19,7 @@ function App() {
 
             <Routes>
                 <Route path="/" element={
-                    <div className="container my-4">
+                    <div className="container text-center my-4">
                         <h1>Welcome naar de beste BPV tool web app</h1>
                     </div>
                 } />

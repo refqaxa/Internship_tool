@@ -94,7 +94,7 @@ export default function CreateUser() {
                 </div>
                 <div className="mb-3">
                     <label className="form-label">Password</label>
-                    <input type="password" name="passwordHash" className="form-control" value={form.passwordHash} onChange={handleChange} required />
+                    <input type="password" name="password" className="form-control" value={form.passwordHash} onChange={handleChange} required />
                 </div>
                 <div className="mb-3">
                     <label className="form-label">Role</label>

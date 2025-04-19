@@ -27,6 +27,9 @@ export default function Navbar() {
                 <ul className="navbar-nav ms-auto">
                     {user && (
                         <>
+                            <span className="navbar-text me-3 text-muted font-weight-bold text-secondary">
+                                Welkom, <strong>{user.fullName}</strong>
+                            </span>
                             {user.role === 'Admin' && (
                                 <>
                                     <li className="nav-item">

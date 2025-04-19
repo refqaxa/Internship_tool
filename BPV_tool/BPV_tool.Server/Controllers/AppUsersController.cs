@@ -25,7 +25,7 @@ namespace BPV_tool.Server.Controllers
         }
 
         // POST: api/AppUsers/login
-        [HttpPost("login")]
+        [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO request)
         {
             var user = await _context.Users.Include(u => u.Role)
@@ -159,7 +159,7 @@ namespace BPV_tool.Server.Controllers
         }
 
         // DELETE: api/AppUsers/DeleteUser/{id}
-        [HttpDelete("{id}")]
+        [HttpDelete("DeleteUser/{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
