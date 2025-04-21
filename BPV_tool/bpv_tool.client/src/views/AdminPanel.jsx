@@ -5,7 +5,6 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import CreateUserModal from '../components/CreateUserModal.jsx';
 
-
 export default function AdminPanel() {
     const { user, token } = useContext(AuthContext);
     const [users, setUsers] = useState([]);
@@ -13,12 +12,13 @@ export default function AdminPanel() {
     const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
+    if (!user || user.role !== 'Admin') {
+        return <Navigate to="/views/login" />;
+    }
 
     useEffect(() => {
-        if (user && user.role === 'Admin') {
-            fetchData();
-        }
-    }, [user]);
+        fetchData();
+    }, [user, token]);
 
     const fetchData = async () => {
         try {
@@ -64,10 +64,6 @@ export default function AdminPanel() {
             toast.error('Failed to delete user');
         }
     };
-
-    if (!user || user.role !== 'Admin') {
-        return <Navigate to="/views/login" />;
-    }
 
     return (
         <div className="container my-5">

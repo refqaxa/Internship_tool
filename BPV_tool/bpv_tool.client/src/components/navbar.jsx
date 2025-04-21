@@ -27,9 +27,6 @@ export default function Navbar() {
                 <ul className="navbar-nav ms-auto">
                     {user && (
                         <>
-                            <span className="navbar-text me-3 text-muted font-weight-bold text-secondary">
-                                Welkom, <strong>{user.fullName}</strong>
-                            </span>
                             {user.role === 'Admin' && (
                                 <>
                                     <li className="nav-item">
@@ -55,9 +52,11 @@ export default function Navbar() {
                                 </li>
                                 </>
                             )}
-                            <span className="navbar-text me-3 text-muted font-weight-bold text-success">
-                                Logged in als: <strong>{user.role}</strong>
-                            </span>
+                            <li className="nav-item">
+                                <span className="nav-link me-3 font-weight-bold text-success">
+                                    Welcome <strong>{user.role}</strong>: <strong>{user.fullName}</strong>
+                                </span>
+                            </li>
                             <li className="nav-item">
                                 <button className="nav-link btn btn-link text-warning" onClick={handleLogout}>Logout</button>
                             </li>

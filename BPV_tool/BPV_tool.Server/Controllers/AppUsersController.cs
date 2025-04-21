@@ -8,6 +8,8 @@ using BPV_app.Data;
 using BPV_app.Models;
 using Microsoft.AspNetCore.Authorization;
 using BPV_tool.Server.DTOs.Users;
+using Humanizer;
+using BPV_tool.Server.DTOs.Users.BPV_app.Models.DTOs.Users;
 
 namespace BPV_tool.Server.Controllers
 {
@@ -171,6 +173,29 @@ namespace BPV_tool.Server.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        // GET: api/AppUsers/Supervisors
+        [HttpGet("Supervisors")]
+        public async Task<ActionResult<IEnumerable<SupervisorDTO>>> GetSupervisors()
+        {
+            // find the Teacher role
+            var teacherRole = await _context.Roles
+                .FirstOrDefaultAsync(r => r.RoleName == "Teacher");
+            if (teacherRole == null)
+                return BadRequest("Teacher role not found.");
+
+            // filter users by the role and make a list
+            var supervisors = await _context.Users
+                .Where(u => u.RoleId == teacherRole.Id)
+                .Select(u => new SupervisorDTO
+                {
+                    Id = u.Id,
+                    FullName = $"{u.FirstName} {u.LastName}"
+                })
+                .ToListAsync();
+
+            return Ok(supervisors);
         }
 
         private bool AppUserExists(Guid id)

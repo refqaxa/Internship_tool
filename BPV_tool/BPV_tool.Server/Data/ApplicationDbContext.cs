@@ -1,4 +1,5 @@
 ﻿using BPV_app.Models;
+using BPV_tool.Server.Models;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,7 @@ namespace BPV_app.Data
         public DbSet<Models.File> Files { get; set; }
         public DbSet<Feedback> Feedback { get; set; }
         public DbSet<BPVProcess> BPVProcesses { get; set; }
+        public DbSet<BPVProcessStep> BPVProcessSteps { get; set; }
         public DbSet<BPVApproval> BPVApprovals { get; set; }
         public DbSet<Log> Logs { get; set; }
 
@@ -63,6 +65,10 @@ namespace BPV_app.Data
                 .WithMany(u => u.BPVApprovals)
                 .HasForeignKey(a => a.ReviewerId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // When a new BPVProcess is added, seed its 4 steps:
+            modelBuilder.Entity<BPVProcessStep>()
+                .HasData();
 
             // Seed roles
             var adminRoleId = Guid.NewGuid();
