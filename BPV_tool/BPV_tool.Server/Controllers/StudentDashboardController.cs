@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,15 +11,14 @@ namespace BPV_tool.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // all actions require at least authentication
-    public class BPVProcessesController : ControllerBase
+    [Authorize]
+    public class StudentDashboardController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        public BPVProcessesController(ApplicationDbContext context) => _context = context;
+        public StudentDashboardController(ApplicationDbContext context) => _context = context;
 
-        // 1) Students list their own processes
-        // GET api/BPVProcesses/my
-        [HttpGet("my")]
+        // GET: api/StudentDashboard/processes
+        [HttpGet("processes")]
         [Authorize(Roles = "Student")]
         public async Task<IActionResult> GetMyProcesses()
         {
@@ -43,14 +39,12 @@ namespace BPV_tool.Server.Controllers
             return Ok(list);
         }
 
-        // 2) Student creates a new process (seeding 4 steps)
-        // POST api/BPVProcesses
-        [HttpPost]
+        // POST: api/StudentDashboard/processes
+        [HttpPost("processes")]
         [Authorize(Roles = "Student")]
         public async Task<IActionResult> CreateProcess([FromBody] CreateProcessDTO dto)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
             var process = new BPVProcess
             {
                 Id = Guid.NewGuid(),
@@ -60,6 +54,7 @@ namespace BPV_tool.Server.Controllers
                 Status = "In behandeling",
                 CreatedAt = DateTime.UtcNow
             };
+
             _context.BPVProcesses.Add(process);
 
             var stepNames = new[]
@@ -84,9 +79,8 @@ namespace BPV_tool.Server.Controllers
             return Ok();
         }
 
-        // 3) Anyone on the process (student, teacher, admin) can view its steps
-        // GET api/BPVProcesses/{processId}/steps
-        [HttpGet("{processId}/steps")]
+        // GET: api/StudentDashboard/processes/{processId}/steps
+        [HttpGet("processes/{processId}/steps")]
         [Authorize(Roles = "Student,Teacher,Admin")]
         public async Task<IActionResult> GetSteps(Guid processId)
         {
@@ -109,69 +103,73 @@ namespace BPV_tool.Server.Controllers
                     ReviewedAt = s.Approval != null ? s.Approval.ReviewedAt : (DateTime?)null
                 })
                 .ToListAsync();
+
             return Ok(steps);
         }
 
-        // 4) Student uploads a file to a step
-        // POST api/BPVProcesses/{processId}/steps/{stepId}/upload
-        [HttpPost("{processId}/steps/{stepId}/upload")]
+        // POST: api/StudentDashboard/processes/{processId}/steps/{stepId}/upload
+        [HttpPost("processes/{processId}/steps/{stepId}/upload")]
         [Authorize(Roles = "Student")]
-        public async Task<IActionResult> UploadStepFile(
-            Guid processId,
-            Guid stepId,
-            [FromForm] UploadStepFileDTO dto)
+        public async Task<IActionResult> UploadStepFile(Guid processId, Guid stepId, [FromForm] UploadStepFileDTO dto)
         {
-            var step = await _context.BPVSteps.FindAsync(stepId);
-            if (step == null || step.BPVProcessId != processId)
+            var step = await _context.BPVSteps
+                .Include(s => s.BPVProcess)
+                    .ThenInclude(p => p.Student)
+                .FirstOrDefaultAsync(s => s.Id == stepId && s.BPVProcessId == processId);
+
+            if (step == null)
                 return NotFound();
 
-            // save to disk
-            var fileName = $"{Guid.NewGuid()}_{dto.File.FileName}";
-            var folder = Path.Combine("Uploads", processId.ToString());
-            Directory.CreateDirectory(folder);
-            var path = Path.Combine(folder, fileName);
-            await using (var fs = new FileStream(path, FileMode.Create))
+            var student = step.BPVProcess.Student;
+
+            // Define a safe folder path like: BPVfiles/FirstNameLastName_GUID
+            var studentFolderName = $"{student.FirstName}_{student.LastName}_{student.Id}".Replace(" ", "").ToLower();
+            var projectRoot = Path.Combine(Directory.GetCurrentDirectory(), "..", "bpv_tool.client", "BPVfiles");
+            var uploadFolder = Path.Combine(projectRoot, studentFolderName);
+            Directory.CreateDirectory(uploadFolder);
+
+            // Save file to folder
+            var uniqueFileName = $"{Guid.NewGuid()}_{dto.File.FileName}";
+            var fullPath = Path.Combine(uploadFolder, uniqueFileName);
+            await using (var fs = new FileStream(fullPath, FileMode.Create))
                 await dto.File.CopyToAsync(fs);
 
-            // create File entity
-            var fileEnt = new BPV_app.Models.File
+            var fileEntity = new BPV_app.Models.File
             {
                 Id = Guid.NewGuid(),
-                StudentId = step.BPVProcess.StudentId,
-                FilePath = path,
+                StudentId = student.Id,
+                FilePath = Path.Combine("BPVfiles", studentFolderName, uniqueFileName).Replace("\\", "/"),
                 UploadedAt = DateTime.UtcNow
             };
-            _context.Files.Add(fileEnt);
+
+            _context.Files.Add(fileEntity);
             await _context.SaveChangesAsync();
 
-            // link to step
-            step.FileId = fileEnt.Id;
+            step.FileId = fileEntity.Id;
             await _context.SaveChangesAsync();
+
             return Ok();
         }
 
-        // 5) Teacher approves (or rejects) a step
-        // POST api/BPVProcesses/{processId}/steps/{stepId}/approve
-        [HttpPost("{processId}/steps/{stepId}/approve")]
+
+        // POST: api/StudentDashboard/processes/{processId}/steps/{stepId}/approve
+        [HttpPost("processes/{processId}/steps/{stepId}/approve")]
         [Authorize(Roles = "Teacher")]
-        public async Task<IActionResult> ApproveStep(
-            Guid processId,
-            Guid stepId,
-            [FromBody] ApproveStepDTO dto)
+        public async Task<IActionResult> ApproveStep(Guid processId, Guid stepId, [FromBody] ApproveStepDTO dto)
         {
-            var step = await _context.BPVSteps.FindAsync(stepId);
-            if (step == null || step.BPVProcessId != processId)
-                return NotFound();
+            var step = await _context.BPVSteps.FirstOrDefaultAsync(s => s.Id == stepId && s.BPVProcessId == processId);
+            if (step == null) return NotFound();
 
             var approval = new BPVApproval
             {
                 Id = Guid.NewGuid(),
-                BPVStepId = step.Id,
+                BPVStepId = stepId,
                 ReviewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)),
                 Status = dto.Status,
                 Feedback = dto.Feedback,
                 ReviewedAt = DateTime.UtcNow
             };
+
             _context.BPVApprovals.Add(approval);
             await _context.SaveChangesAsync();
 

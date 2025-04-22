@@ -2,6 +2,7 @@
 import { AuthContext } from '../context/AuthContext.jsx';
 import { toast } from 'react-toastify';
 import { Accordion, Card, Button, Form } from 'react-bootstrap';
+import { Navigate } from 'react-router-dom';
 
 function StartProcessModal({ show, onClose, onCreated }) {
     const { token } = useContext(AuthContext);
@@ -11,18 +12,17 @@ function StartProcessModal({ show, onClose, onCreated }) {
 
     useEffect(() => {
         if (!show) return;
-        // fetch list of supervisors
         fetch('/api/AppUsers/Supervisors', {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(r => r.json())
             .then(setSupervisors)
             .catch(() => toast.error('Failed to load supervisors'));
-        }, [show, token]);
+    }, [show, token]);
 
     const handleSubmit = async e => {
         e.preventDefault();
-        const res = await fetch('/api/BPVProcesses/Create', {
+        const res = await fetch('/api/StudentDashboard/processes', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -89,7 +89,7 @@ function ProcessAccordion({ proc, token }) {
     const [steps, setSteps] = useState([]);
 
     useEffect(() => {
-        fetch(`/api/BPVProcessSteps/ByProcess/${proc.id}`, {
+        fetch(`/api/StudentDashboard/processes/${proc.id}/steps`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(r => r.json())
@@ -100,14 +100,19 @@ function ProcessAccordion({ proc, token }) {
     const uploadFile = async (stepId, file) => {
         const fd = new FormData();
         fd.append('File', file);
-        await fetch(`/api/BPVProcessSteps/UploadFile/${stepId}`, {
+        await fetch(`/api/StudentDashboard/processes/${proc.id}/steps/${stepId}/upload`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}` },
             body: fd
         });
         toast.success('Bestand geüpload');
-        // reload steps...
-        setSteps(steps => /* re-fetch or update*/[]);
+        // re-fetch steps after upload
+        fetch(`/api/StudentDashboard/processes/${proc.id}/steps`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(r => r.json())
+            .then(setSteps)
+            .catch(() => toast.error('Fout bij herladen stappen'));
     };
 
     return (
@@ -118,7 +123,7 @@ function ProcessAccordion({ proc, token }) {
                     <Accordion.Body>
                         <p>Status: {s.approvalStatus || 'Niet beoordeeld'}</p>
                         {s.filePath
-                            ? <a href={s.filePath} target="_blank">Download bestand</a>
+                            ? <a href={`/${s.filePath}`} target="_blank" rel="noopener noreferrer">Download bestand</a>
                             : (
                                 <Form.Group>
                                     <Form.Control
@@ -127,9 +132,9 @@ function ProcessAccordion({ proc, token }) {
                                 </Form.Group>
                             )
                         }
-                        {s.approvalComment && (
+                        {s.feedback && (
                             <div className="mt-2">
-                                <strong>Feedback:</strong> {s.approvalComment}
+                                <strong>Feedback:</strong> {s.feedback}
                             </div>
                         )}
                     </Accordion.Body>
@@ -138,6 +143,7 @@ function ProcessAccordion({ proc, token }) {
         </Accordion>
     );
 }
+
 export default function Studentdashboard() {
     const { user, token } = useContext(AuthContext);
     const [processes, setProcesses] = useState([]);
@@ -148,7 +154,7 @@ export default function Studentdashboard() {
     }
 
     const fetchProcesses = async () => {
-        const res = await fetch('/api/BPVProcesses/My', {
+        const res = await fetch('/api/StudentDashboard/processes', {
             headers: { Authorization: `Bearer ${token}` }
         });
         if (res.ok) setProcesses(await res.json());
@@ -181,11 +187,8 @@ export default function Studentdashboard() {
                             <Card className="mb-3">
                                 <Card.Body>
                                     <Card.Title>Jouw bestanden</Card.Title>
-                                        {/*{processes.map(proc => (*/}
-                                        {/*    <div key={proc.id} className="mb-4 list-group-item d-flex justify-content-between">*/}
-                                        {/*    </div>*/}
-                                        {/* )}*/}
-                                        {/*<Button onClick={ZIP download }>Download ZIP</Button>*/}
+                                    {/* Optional ZIP download feature later */}
+                                    {/* <Button>Download als ZIP</Button> */}
                                 </Card.Body>
                             </Card>
                         </div>
@@ -193,13 +196,15 @@ export default function Studentdashboard() {
                         {/* Main content */}
                         <div className="col-md-8 list-group">
                             {processes.map(proc => (
-                                <div key={proc.id} className="mb-4 list-group-item d-flex justify-content-between">
+                                <div key={proc.id} className="mb-4 list-group-item">
                                     <div>
                                         <h5>{proc.companyName} — {proc.status}</h5>
                                         Begeleider: {proc.supervisorName}<br />
+                                        <small className="text-muted">
+                                            Gestart op: {new Date(proc.createdAt).toLocaleDateString()}
+                                        </small>
                                     </div>
                                     <ProcessAccordion proc={proc} token={token} />
-                                    <small className="text-muted">{new Date(proc.createdAt).toLocaleDateString()}</small>
                                 </div>
                             ))}
                         </div>
@@ -207,7 +212,7 @@ export default function Studentdashboard() {
                 </>
             )}
 
-            <div className="d-flex justify-content-between align-items-start mb-4">
+            <div className="d-flex justify-content-between align-items-start mt-4">
                 <button className="btn btn-success" onClick={() => setShowModal(true)}>
                     Nieuw proces starten
                 </button>
