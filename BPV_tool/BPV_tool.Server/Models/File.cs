@@ -1,4 +1,6 @@
-﻿namespace BPV_app.Models
+﻿using BPV_tool.Server.Models;
+
+namespace BPV_app.Models
 {
     public class File
     {
@@ -8,10 +10,9 @@
         public AppUser Student { get; set; }
 
         public string FilePath { get; set; }
-        public string BpvStep { get; set; }
         public DateTime UploadedAt { get; set; }
 
-        public ICollection<Feedback> Feedback { get; set; } = new List<Feedback>();
+        public ICollection<BPVStep> ProcessSteps { get; set; } = new List<BPVStep>();
     }
 
 

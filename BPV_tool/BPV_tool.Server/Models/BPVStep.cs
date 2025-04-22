@@ -3,11 +3,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BPV_tool.Server.Models
 {
-    public class BPVProcessStep
+    public class BPVStep
     {
         public Guid Id { get; set; }
-
-        // Link back to the process
         public Guid BPVProcessId { get; set; }
         public BPVProcess BPVProcess { get; set; }
 

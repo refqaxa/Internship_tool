@@ -163,9 +163,6 @@ export default function Studentdashboard() {
         <div className="container my-5">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2>Mijn BPV‑processen</h2>
-                <button className="btn btn-success" onClick={() => setShowModal(true)}>
-                    Nieuw proces starten
-                </button>
             </div>
 
             <StartProcessModal
@@ -209,6 +206,12 @@ export default function Studentdashboard() {
                     </div>
                 </>
             )}
+
+            <div className="d-flex justify-content-between align-items-start mb-4">
+                <button className="btn btn-success" onClick={() => setShowModal(true)}>
+                    Nieuw proces starten
+                </button>
+            </div>
         </div>
     );
 }
