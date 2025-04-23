@@ -1,6 +1,5 @@
 ﻿
 html, body, #root {
-    height: 100%;
     width: 100%;
     margin: 0 auto;
     padding: 2rem;
@@ -8,6 +7,11 @@ html, body, #root {
     border-radius: 10px;
 }
 
+.navbar {
+    position: fixed; 
+    top: 5%;  
+    width: 90%;  
+}
 
 body {
     font-family: Arial, sans-serif;

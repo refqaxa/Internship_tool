@@ -123,7 +123,7 @@ function ProcessAccordion({ proc, token, onFileUpload }) {
                 <Accordion.Item eventKey={idx.toString()} key={s.id}>
                     <Accordion.Header>{s.stepName}</Accordion.Header>
                     <Accordion.Body>
-                        <p>Status: {s.approvalStatus || 'Niet beoordeeld'}</p>
+                        <p>Status: {s.approvalStatus || 'Nog niet ingeleverd'}</p>
                         {s.filePath ? (
                             <>
                                 <a href={`/${s.filePath}`} target="_blank" rel="noreferrer">
@@ -159,15 +159,12 @@ export default function Studentdashboard() {
     const [showModal, setShowModal] = useState(false);
     const [loading, setLoading] = useState(true);
     const [uploadStatus, setUploadStatus] = useState({});
+    const [studentFiles, setStudentFiles] = useState([]);
 
 
     if (!user || user.role !== 'Student') {
         return <Navigate to="/views/login" />;
     }
-
-    const handleFileUpload = (processId, hasFile) => {
-        setUploadStatus(prev => ({ ...prev, [processId]: hasFile }));
-    };
 
     const hasAnyFiles = Object.values(uploadStatus).some(v => v);
 
@@ -176,8 +173,58 @@ export default function Studentdashboard() {
         const res = await fetch('/api/StudentDashboard/processes', {
             headers: { Authorization: `Bearer ${token}` }
         });
-        if (res.ok) setProcesses(await res.json());
-        else toast.error('Kon BPV‑processen niet laden');
+        if (!res.ok) {
+            toast.error('Kon BPV‑processen niet laden');
+            setLoading(false);
+            return;
+        }
+
+        const list = await res.json();
+        setProcesses(list);
+
+        // Voor elk process checken of er stappen zijn met een bestand 
+        const fileStatusMap = {};
+        for (const p of list) {
+            try {
+                const resSteps = await fetch(`/api/StudentDashboard/processes/${p.id}/steps`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (resSteps.ok) {
+                    const steps = await resSteps.json();
+                    fileStatusMap[p.id] = steps.some(s => s.filePath);
+                }
+            } catch (e) {
+                console.error(`Kon stappen niet ophalen voor proces ${p.id}`);
+            }
+        }
+
+        setUploadStatus(fileStatusMap);
+        const allFiles = [];
+
+        for (const p of list) {
+            try {
+                const resSteps = await fetch(`/api/StudentDashboard/processes/${p.id}/steps`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (resSteps.ok) {
+                    const steps = await resSteps.json();
+                    steps.forEach(s => {
+                        if (s.filePath) {
+                            allFiles.push({
+                                name: s.filePath.split('/').pop(),
+                                url: `/${s.filePath}`,
+                                stepName: s.stepName
+                            });
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error(`Fout bij ophalen bestanden voor proces ${p.id}`);
+            }
+        }
+
+        setStudentFiles(allFiles);
         setLoading(false);
     };
 
@@ -226,13 +273,29 @@ export default function Studentdashboard() {
                             <Card className="mb-3">
                                 <Card.Body>
                                     <Card.Title>Jouw bestanden</Card.Title>
-                                        <Button
-                                            onClick={handleDownloadZip}
-                                            disabled={!hasAnyFiles}
-                                            variant={hasAnyFiles ? 'primary' : 'secondary'}
-                                        >
-                                            Download als ZIP
-                                        </Button>
+                                        {studentFiles.length > 0 ? (
+                                            <>
+                                                <ul className="list-unstyled mb-3">
+                                                    {studentFiles.map((f, i) => (
+                                                        <li key={i}>
+                                                            <a href={f.url} target="_blank" rel="noreferrer">
+                                                                {f.name}
+                                                            </a>
+                                                            <br />
+                                                            <small className="text-muted">Stap: {f.stepName}</small>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                                <Button
+                                                    onClick={handleDownloadZip}
+                                                    variant="primary"
+                                                >
+                                                    Download als ZIP
+                                                </Button>
+                                            </>
+                                        ) : (
+                                            <p className="text-muted">Nog geen bestanden geüpload.</p>
+                                        )}
                                 </Card.Body>
                             </Card>
                         </div>
