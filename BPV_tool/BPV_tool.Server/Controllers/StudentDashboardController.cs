@@ -6,6 +6,7 @@ using BPV_app.Data;
 using BPV_app.Models;
 using BPV_tool.Server.DTOs.Process;
 using BPV_tool.Server.Models;
+using System.IO.Compression;
 
 namespace BPV_tool.Server.Controllers
 {
@@ -177,5 +178,30 @@ namespace BPV_tool.Server.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
+
+        [HttpGet("download-zip")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> DownloadZip()
+        {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var user = await _context.Users.FindAsync(userId);
+
+            var folderName = $"{user.FirstName}_{user.LastName}_{user.Id}".Replace(" ", "").ToLower();
+            var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "bpv_tool.client", "BPVfiles", folderName);
+
+            if (!Directory.Exists(folderPath))
+                return NotFound("Geen bestanden gevonden");
+
+            var zipName = $"bpv-bestanden-{user.FirstName}-{user.LastName}.zip";
+            var zipPath = Path.Combine(Path.GetTempPath(), zipName);
+            if (System.IO.File.Exists(zipPath))
+                System.IO.File.Delete(zipPath);
+
+            ZipFile.CreateFromDirectory(folderPath, zipPath);
+            var zipBytes = await System.IO.File.ReadAllBytesAsync(zipPath);
+            return File(zipBytes, "application/zip", zipName);
+        }
+
+
     }
 }

@@ -84,8 +84,7 @@ function StartProcessModal({ show, onClose, onCreated }) {
         </div>
     );
 }
-
-function ProcessAccordion({ proc, token }) {
+function ProcessAccordion({ proc, token, onFileUpload }) {
     const [steps, setSteps] = useState([]);
 
     useEffect(() => {
@@ -93,7 +92,10 @@ function ProcessAccordion({ proc, token }) {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(r => r.json())
-            .then(setSteps)
+            .then(data => {
+                setSteps(data);
+                onFileUpload(proc.id, data.some(step => step.filePath));
+            })
             .catch(() => toast.error('Kon stappen niet laden'));
     }, [proc.id, token]);
 
@@ -106,39 +108,46 @@ function ProcessAccordion({ proc, token }) {
             body: fd
         });
         toast.success('Bestand geüpload');
-        // re-fetch steps after upload
-        fetch(`/api/StudentDashboard/processes/${proc.id}/steps`, {
+        // Re-fetch steps after upload
+        const res = await fetch(`/api/StudentDashboard/processes/${proc.id}/steps`, {
             headers: { Authorization: `Bearer ${token}` }
-        })
-            .then(r => r.json())
-            .then(setSteps)
-            .catch(() => toast.error('Fout bij herladen stappen'));
+        });
+        const updated = await res.json();
+        setSteps(updated);
+        onFileUpload(proc.id, updated.some(step => step.filePath));
     };
 
     return (
         <Accordion>
-            {steps.map(s => (
-                <Card key={s.id}>
+            {steps.map((s, idx) => (
+                <Accordion.Item eventKey={idx.toString()} key={s.id}>
                     <Accordion.Header>{s.stepName}</Accordion.Header>
                     <Accordion.Body>
                         <p>Status: {s.approvalStatus || 'Niet beoordeeld'}</p>
-                        {s.filePath
-                            ? <a href={`/${s.filePath}`} target="_blank" rel="noopener noreferrer">Download bestand</a>
-                            : (
-                                <Form.Group>
-                                    <Form.Control
-                                        type="file"
-                                        onChange={e => uploadFile(s.id, e.target.files[0])} />
-                                </Form.Group>
-                            )
-                        }
+                        {s.filePath ? (
+                            <>
+                                <a href={`/${s.filePath}`} target="_blank" rel="noreferrer">
+                                    Bekijk bestand
+                                </a>
+                                <br />
+                                <small className="text-muted">
+                                    Geüpload op {new Date(s.uploadedAt).toLocaleDateString()}
+                                </small>
+                            </>
+                        ) : (
+                            <Form.Group>
+                                <Form.Control
+                                    type="file"
+                                    onChange={e => uploadFile(s.id, e.target.files[0])} />
+                            </Form.Group>
+                        )}
                         {s.feedback && (
                             <div className="mt-2">
                                 <strong>Feedback:</strong> {s.feedback}
                             </div>
                         )}
                     </Accordion.Body>
-                </Card>
+                </Accordion.Item>
             ))}
         </Accordion>
     );
@@ -148,18 +157,46 @@ export default function Studentdashboard() {
     const { user, token } = useContext(AuthContext);
     const [processes, setProcesses] = useState([]);
     const [showModal, setShowModal] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [uploadStatus, setUploadStatus] = useState({});
+
 
     if (!user || user.role !== 'Student') {
         return <Navigate to="/views/login" />;
     }
 
+    const handleFileUpload = (processId, hasFile) => {
+        setUploadStatus(prev => ({ ...prev, [processId]: hasFile }));
+    };
+
+    const hasAnyFiles = Object.values(uploadStatus).some(v => v);
+
     const fetchProcesses = async () => {
+        setLoading(true);
         const res = await fetch('/api/StudentDashboard/processes', {
             headers: { Authorization: `Bearer ${token}` }
         });
         if (res.ok) setProcesses(await res.json());
         else toast.error('Kon BPV‑processen niet laden');
+        setLoading(false);
     };
+
+    const handleDownloadZip = async () => {
+        const res = await fetch('/api/StudentDashboard/download-zip', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) return toast.error('Download mislukt');
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'mijn_bpv_bestanden.zip';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    };
+
 
     useEffect(() => {
         fetchProcesses();
@@ -177,7 +214,9 @@ export default function Studentdashboard() {
                 onCreated={fetchProcesses}
             />
 
-            {processes.length === 0 ? (
+            {loading ? (
+                <p>Loading processes...</p>
+            ) : processes.length === 0 ? (
                 <div className="alert alert-info">Je hebt nog geen BPV‑processen.</div>
             ) : (
                 <>
@@ -187,8 +226,13 @@ export default function Studentdashboard() {
                             <Card className="mb-3">
                                 <Card.Body>
                                     <Card.Title>Jouw bestanden</Card.Title>
-                                    {/* Optional ZIP download feature later */}
-                                    {/* <Button>Download als ZIP</Button> */}
+                                        <Button
+                                            onClick={handleDownloadZip}
+                                            disabled={!hasAnyFiles}
+                                            variant={hasAnyFiles ? 'primary' : 'secondary'}
+                                        >
+                                            Download als ZIP
+                                        </Button>
                                 </Card.Body>
                             </Card>
                         </div>
