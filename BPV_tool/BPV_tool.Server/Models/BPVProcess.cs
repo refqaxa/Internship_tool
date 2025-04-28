@@ -1,4 +1,6 @@
-﻿namespace BPV_app.Models
+﻿using BPV_tool.Server.Models;
+
+namespace BPV_app.Models
 {
     public class BPVProcess
     {
@@ -15,7 +17,7 @@
         public string Status { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        public ICollection<BPVApproval> Approvals { get; set; } = new List<BPVApproval>();
+        public ICollection<BPVStep> Steps { get; set; } = new List<BPVStep>();
         public ICollection<Log> Logs { get; set; } = new List<Log>();
     }
 

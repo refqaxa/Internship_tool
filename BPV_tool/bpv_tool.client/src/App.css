@@ -1,9 +1,23 @@
-﻿#root {
-    max-width: 1280px;
+﻿
+html, body, #root {
+    width: 100%;
     margin: 0 auto;
     padding: 2rem;
-    text-align: center;
+    box-sizing: border-box;
+    border-radius: 10px;
 }
+
+.navbar {
+    position: fixed; 
+    top: 5%;  
+    width: 90%;  
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
 
 th, td {
     padding-left: 1rem;

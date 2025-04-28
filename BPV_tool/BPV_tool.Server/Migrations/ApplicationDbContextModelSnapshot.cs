@@ -55,6 +55,17 @@ namespace BPV_tool.Server.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("ad60ac3e-c06a-44b2-bf91-ebf31ba9cbf0"),
+                            Email = "admin@bpv.local",
+                            FirstName = "Admin",
+                            LastName = "User",
+                            PasswordHash = "$2a$11$Xst.yGIMBttmSSzEU/7STe60Oii.FOmTFshWcmbvokgcngDOq8nOO",
+                            RoleId = new Guid("d16f78c8-12ce-4f83-948c-46a2fd7b8e48")
+                        });
                 });
 
             modelBuilder.Entity("BPV_app.Models.BPVApproval", b =>
@@ -63,16 +74,16 @@ namespace BPV_tool.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("BPVProcessId")
+                    b.Property<Guid?>("BPVStepId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Comment")
+                    b.Property<string>("Feedback")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ReviewedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("ReviewerId")
+                    b.Property<Guid?>("ReviewerId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Status")
@@ -81,7 +92,9 @@ namespace BPV_tool.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BPVProcessId");
+                    b.HasIndex("BPVStepId")
+                        .IsUnique()
+                        .HasFilter("[BPVStepId] IS NOT NULL");
 
                     b.HasIndex("ReviewerId");
 
@@ -120,43 +133,11 @@ namespace BPV_tool.Server.Migrations
                     b.ToTable("BPVProcesses");
                 });
 
-            modelBuilder.Entity("BPV_app.Models.Feedback", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Comment")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("FileId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ReviewerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FileId");
-
-                    b.HasIndex("ReviewerId");
-
-                    b.ToTable("Feedback");
-                });
-
             modelBuilder.Entity("BPV_app.Models.File", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("BpvStep")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FilePath")
                         .IsRequired()
@@ -219,6 +200,54 @@ namespace BPV_tool.Server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("d16f78c8-12ce-4f83-948c-46a2fd7b8e48"),
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            Id = new Guid("eaa0d75d-47f1-4365-9a21-79df264dd29e"),
+                            RoleName = "Teacher"
+                        },
+                        new
+                        {
+                            Id = new Guid("2bf761ae-8f9f-413d-86d2-60a17bdb6c86"),
+                            RoleName = "Student"
+                        });
+                });
+
+            modelBuilder.Entity("BPV_tool.Server.Models.BPVStep", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ApprovalId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BPVProcessId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("FileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("StepIndex")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StepName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BPVProcessId");
+
+                    b.HasIndex("FileId");
+
+                    b.ToTable("BPVSteps");
                 });
 
             modelBuilder.Entity("BPV_app.Models.AppUser", b =>
@@ -226,7 +255,7 @@ namespace BPV_tool.Server.Migrations
                     b.HasOne("BPV_app.Models.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Role");
@@ -234,19 +263,17 @@ namespace BPV_tool.Server.Migrations
 
             modelBuilder.Entity("BPV_app.Models.BPVApproval", b =>
                 {
-                    b.HasOne("BPV_app.Models.BPVProcess", "BPVProcess")
-                        .WithMany("Approvals")
-                        .HasForeignKey("BPVProcessId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("BPV_tool.Server.Models.BPVStep", "BPVStep")
+                        .WithOne("Approval")
+                        .HasForeignKey("BPV_app.Models.BPVApproval", "BPVStepId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("BPV_app.Models.AppUser", "Reviewer")
                         .WithMany("BPVApprovals")
                         .HasForeignKey("ReviewerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("BPVProcess");
+                    b.Navigation("BPVStep");
 
                     b.Navigation("Reviewer");
                 });
@@ -268,25 +295,6 @@ namespace BPV_tool.Server.Migrations
                     b.Navigation("Student");
 
                     b.Navigation("Supervisor");
-                });
-
-            modelBuilder.Entity("BPV_app.Models.Feedback", b =>
-                {
-                    b.HasOne("BPV_app.Models.File", "File")
-                        .WithMany("Feedback")
-                        .HasForeignKey("FileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BPV_app.Models.AppUser", "Reviewer")
-                        .WithMany("GivenFeedback")
-                        .HasForeignKey("ReviewerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("File");
-
-                    b.Navigation("Reviewer");
                 });
 
             modelBuilder.Entity("BPV_app.Models.File", b =>
@@ -311,7 +319,7 @@ namespace BPV_tool.Server.Migrations
                     b.HasOne("BPV_app.Models.AppUser", "Student")
                         .WithMany("Logs")
                         .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("BPVProcess");
@@ -319,11 +327,27 @@ namespace BPV_tool.Server.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("BPV_tool.Server.Models.BPVStep", b =>
+                {
+                    b.HasOne("BPV_app.Models.BPVProcess", "BPVProcess")
+                        .WithMany("Steps")
+                        .HasForeignKey("BPVProcessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BPV_app.Models.File", "File")
+                        .WithMany("ProcessSteps")
+                        .HasForeignKey("FileId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("BPVProcess");
+
+                    b.Navigation("File");
+                });
+
             modelBuilder.Entity("BPV_app.Models.AppUser", b =>
                 {
                     b.Navigation("BPVApprovals");
-
-                    b.Navigation("GivenFeedback");
 
                     b.Navigation("Logs");
 
@@ -336,19 +360,25 @@ namespace BPV_tool.Server.Migrations
 
             modelBuilder.Entity("BPV_app.Models.BPVProcess", b =>
                 {
-                    b.Navigation("Approvals");
-
                     b.Navigation("Logs");
+
+                    b.Navigation("Steps");
                 });
 
             modelBuilder.Entity("BPV_app.Models.File", b =>
                 {
-                    b.Navigation("Feedback");
+                    b.Navigation("ProcessSteps");
                 });
 
             modelBuilder.Entity("BPV_app.Models.Role", b =>
                 {
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("BPV_tool.Server.Models.BPVStep", b =>
+                {
+                    b.Navigation("Approval")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

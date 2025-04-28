@@ -1,0 +1,144 @@
+namespace BPV_app.Models
+{
+    public class AppUser
+    {
+        public Guid Id { get; set; }
+
+        public string FirstName { get; set; }
+        public string? MiddleName { get; set; }
+        public string LastName { get; set; }
+
+        public string Email { get; set; }
+        public string PasswordHash { get; set; }
+
+        public Guid RoleId { get; set; }
+        public Role Role { get; set; }
+
+        public ICollection<File> UploadedFiles { get; set; } = new List<File>();
+        public ICollection<BPVProcess> SupervisedProcesses { get; set; } = new List<BPVProcess>();
+        public ICollection<BPVProcess> StartedProcesses { get; set; } = new List<BPVProcess>();
+        public ICollection<BPVApproval> BPVApprovals { get; set; } = new List<BPVApproval>();
+        public ICollection<Log> Logs { get; set; } = new List<Log>();
+    }
+
+}
+
+
+using BPV_tool.Server.Models;
+
+namespace BPV_app.Models
+{
+    public class BPVApproval
+    {
+        public Guid Id { get; set; }
+        public Guid BPVProcessStepId { get; set; }
+        public BPVStep BPVProcessStep { get; set; }
+        public Guid ReviewerId { get; set; }
+        public AppUser Reviewer { get; set; }
+
+        public string Status { get; set; }
+        public string? Feedback { get; set; }
+        public DateTime ReviewedAt { get; set; }
+    }
+
+
+}
+using BPV_tool.Server.Models;
+
+namespace BPV_app.Models
+{
+    public class BPVProcess
+    {
+        public Guid Id { get; set; }
+
+        public Guid StudentId { get; set; }
+        public AppUser Student { get; set; }
+
+        public string CompanyName { get; set; }
+
+        public Guid SupervisorId { get; set; }
+        public AppUser Supervisor { get; set; }
+
+        public string Status { get; set; }
+        public DateTime CreatedAt { get; set; }
+
+        public ICollection<BPVStep> Steps { get; set; } = new List<BPVStep>();
+        public ICollection<Log> Logs { get; set; } = new List<Log>();
+    }
+
+
+}
+using BPV_app.Models;
+using System.ComponentModel.DataAnnotations;
+
+namespace BPV_tool.Server.Models
+{
+    public class BPVStep
+    {
+        public Guid Id { get; set; }
+        public Guid BPVProcessId { get; set; }
+        public BPVProcess BPVProcess { get; set; }
+
+        // Static step info
+        public int StepIndex { get; set; }       // 1…4
+        public string StepName { get; set; }     // e.g. "BPV‑contract upload"
+
+        // Uploaded file (optional until student uploads)
+        public Guid? FileId { get; set; }
+        public BPV_app.Models.File File { get; set; }
+
+        // Approval record (optional until teacher reviews)
+        public Guid? ApprovalId { get; set; }
+        public BPVApproval Approval { get; set; }
+    }
+}
+using BPV_tool.Server.Models;
+
+namespace BPV_app.Models
+{
+    public class File
+    {
+        public Guid Id { get; set; }
+
+        public Guid StudentId { get; set; }
+        public AppUser Student { get; set; }
+
+        public string FilePath { get; set; }
+        public DateTime UploadedAt { get; set; }
+
+        public ICollection<BPVStep> ProcessSteps { get; set; } = new List<BPVStep>();
+    }
+
+
+}
+namespace BPV_app.Models
+{
+    public class Log
+    {
+        public Guid Id { get; set; }
+
+        public Guid StudentId { get; set; }
+        public AppUser Student { get; set; }
+
+        public Guid BPVProcessId { get; set; }
+        public BPVProcess BPVProcess { get; set; }
+
+        public DateTime Date { get; set; }
+        public double Hours { get; set; }
+        public string Activity { get; set; }
+    }
+
+
+}
+namespace BPV_app.Models
+{
+    public class Role
+    {
+        public Guid Id { get; set; }
+        public string RoleName { get; set; }
+
+        public ICollection<AppUser> Users { get; set; } = new List<AppUser>();
+    }
+
+
+}

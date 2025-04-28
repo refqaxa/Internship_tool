@@ -1,51 +1,80 @@
 import { useEffect, useState } from 'react';
 import './App.css';
+import Navbar from './components/navbar.jsx';
+import Footer from './components/footer.jsx';
+
+import { Routes, Route } from 'react-router-dom';
+import Login from './views/Login';
+import TeacherDashboard from './views/Teacherdashboard';
+import StudentDashboard from './views/Studentdashboard';
+import AdminPanel from './views/AdminPanel';
+import Logbook from './views/Logbook';
+import CreateUser from './views/CreateUser.jsx';
 
 function App() {
-    const [forecasts, setForecasts] = useState();
-
-    useEffect(() => {
-        populateWeatherData();
-    }, []);
-
-    const contents = forecasts === undefined
-        ? <p><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em></p>
-        : <table className="table table-striped" aria-labelledby="tableLabel">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Temp. (C)</th>
-                    <th>Temp. (F)</th>
-                    <th>Summary</th>
-                </tr>
-            </thead>
-            <tbody>
-                {forecasts.map(forecast =>
-                    <tr key={forecast.date}>
-                        <td>{forecast.date}</td>
-                        <td>{forecast.temperatureC}</td>
-                        <td>{forecast.temperatureF}</td>
-                        <td>{forecast.summary}</td>
-                    </tr>
-                )}
-            </tbody>
-        </table>;
 
     return (
-        <div>
-            <h1 id="tableLabel">Weather forecast</h1>
-            <p>This component demonstrates fetching data from the server.</p>
-            {contents}
-        </div>
+        <>
+            <Navbar />
+
+            <Routes>
+                <Route path="/" element={
+                    <div className="container text-center my-4">
+                        <h1>Welcome naar de beste BPV tool web app</h1>
+                    </div>
+                } />
+                <Route path="/views/adminpanel" element={<AdminPanel />} />
+                <Route path="/views/Teacherdashboard" element={<TeacherDashboard />} />
+                <Route path="/views/Studentdashboard" element={<StudentDashboard />} />
+                <Route path="/views/logbook" element={<Logbook />} />
+                <Route path="/views/createuser" element={<CreateUser />} />
+                <Route path="/views/login" element={<Login />} />
+            </Routes>
+            
+          <Footer />
+        </>
     );
     
-    async function populateWeatherData() {
-        const response = await fetch('weatherforecast');
-        if (response.ok) {
-            const data = await response.json();
-            setForecasts(data);
-        }
-    }
 }
 
+
 export default App;
+
+
+
+//// Update user usage:
+//await fetch('/api/appusers/create-user', {
+//    method: 'POST',
+//    headers: { 'Content-Type': 'application/json' },
+//    body: JSON.stringify({
+//        firstName: 'John',
+//        lastName: 'Doe',
+//        email: 'john@example.com',
+//        passwordHash: 'John@123',
+//        roleId: 'role-guid-here'
+//    })
+//});
+
+//// Roles dropdown
+//function RoleDropdown({ onChange }) {
+//    const [roles, setRoles] = useState([]);
+
+//    useEffect(() => {
+//        fetch("/api/appusers/roles")
+//            .then(res => res.json())
+//            .then(data => setRoles(data))
+//            .catch(err => console.error("Failed to fetch roles", err));
+//    }, []);
+
+//    return (
+//        <select onChange={e => onChange(e.target.value)}>
+//            <option value="">-- Select Role --</option>
+//            {roles.map(role => (
+//                <option key={role.id} value={role.id}>
+//                    {role.roleName}
+//                </option>
+//            ))}
+//        </select>
+//    );
+//}
+

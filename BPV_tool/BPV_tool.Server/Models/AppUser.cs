@@ -1,6 +1,4 @@
-﻿using System.Data;
-
-namespace BPV_app.Models
+﻿namespace BPV_app.Models
 {
     public class AppUser
     {
@@ -17,7 +15,6 @@ namespace BPV_app.Models
         public Role Role { get; set; }
 
         public ICollection<File> UploadedFiles { get; set; } = new List<File>();
-        public ICollection<Feedback> GivenFeedback { get; set; } = new List<Feedback>();
         public ICollection<BPVProcess> SupervisedProcesses { get; set; } = new List<BPVProcess>();
         public ICollection<BPVProcess> StartedProcesses { get; set; } = new List<BPVProcess>();
         public ICollection<BPVApproval> BPVApprovals { get; set; } = new List<BPVApproval>();
