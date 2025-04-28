@@ -20,7 +20,7 @@ function App() {
             <Routes>
                 <Route path="/" element={
                     <div className="container text-center my-4">
-                        <h1>Welcome naar de beste BPV tool web app</h1>
+                        <h1>Welcome to the best internship tool web app</h1>
                     </div>
                 } />
                 <Route path="/views/adminpanel" element={<AdminPanel />} />
@@ -30,51 +30,11 @@ function App() {
                 <Route path="/views/createuser" element={<CreateUser />} />
                 <Route path="/views/login" element={<Login />} />
             </Routes>
-            
-          <Footer />
+
+            <Footer />
         </>
     );
-    
+
 }
 
-
 export default App;
-
-
-
-//// Update user usage:
-//await fetch('/api/appusers/create-user', {
-//    method: 'POST',
-//    headers: { 'Content-Type': 'application/json' },
-//    body: JSON.stringify({
-//        firstName: 'John',
-//        lastName: 'Doe',
-//        email: 'john@example.com',
-//        passwordHash: 'John@123',
-//        roleId: 'role-guid-here'
-//    })
-//});
-
-//// Roles dropdown
-//function RoleDropdown({ onChange }) {
-//    const [roles, setRoles] = useState([]);
-
-//    useEffect(() => {
-//        fetch("/api/appusers/roles")
-//            .then(res => res.json())
-//            .then(data => setRoles(data))
-//            .catch(err => console.error("Failed to fetch roles", err));
-//    }, []);
-
-//    return (
-//        <select onChange={e => onChange(e.target.value)}>
-//            <option value="">-- Select Role --</option>
-//            {roles.map(role => (
-//                <option key={role.id} value={role.id}>
-//                    {role.roleName}
-//                </option>
-//            ))}
-//        </select>
-//    );
-//}
-

@@ -45,7 +45,7 @@ function StartProcessModal({ show, onClose, onCreated }) {
             <div className="modal-dialog">
                 <form className="modal-content" onSubmit={handleSubmit}>
                     <div className="modal-header">
-                        <h5 className="modal-title">Start BPV‑proces</h5>
+                        <h5 className="modal-title">Start an internship process</h5>
                         <button type="button" className="btn-close" onClick={onClose} />
                     </div>
                     <div className="modal-body">
@@ -76,8 +76,8 @@ function StartProcessModal({ show, onClose, onCreated }) {
                         </div>
                     </div>
                     <div className="modal-footer">
-                        <button className="btn btn-secondary" onClick={onClose}>Annuleren</button>
-                        <button className="btn btn-primary" type="submit">Starten</button>
+                        <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                        <button className="btn btn-primary" type="submit">Start</button>
                     </div>
                 </form>
             </div>
@@ -127,11 +127,11 @@ function ProcessAccordion({ proc, token, onFileUpload }) {
                         {s.filePath ? (
                             <>
                                 <a href={`/${s.filePath}`} target="_blank" rel="noreferrer">
-                                    Bekijk bestand
+                                    Open file
                                 </a>
                                 <br />
                                 <small className="text-muted">
-                                    Geüpload op {new Date(s.uploadedAt).toLocaleDateString()}
+                                    Uploaded on {new Date(s.uploadedAt).toLocaleDateString()}
                                 </small>
                             </>
                         ) : (
@@ -252,7 +252,7 @@ export default function Studentdashboard() {
     return (
         <div className="container my-5">
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2>Mijn BPV‑processen</h2>
+                <h2>All my internships processes</h2>
             </div>
 
             <StartProcessModal
@@ -264,7 +264,7 @@ export default function Studentdashboard() {
             {loading ? (
                 <p>Loading processes...</p>
             ) : processes.length === 0 ? (
-                <div className="alert alert-info">Je hebt nog geen BPV‑processen.</div>
+                <div className="alert alert-info">You hvae no internships processes.</div>
             ) : (
                 <>
                     <div className="row">
@@ -272,30 +272,30 @@ export default function Studentdashboard() {
                         <div className="col-md-4">
                             <Card className="mb-3">
                                 <Card.Body>
-                                    <Card.Title>Jouw bestanden</Card.Title>
-                                        {studentFiles.length > 0 ? (
-                                            <>
-                                                <ul className="list-unstyled mb-3">
-                                                    {studentFiles.map((f, i) => (
-                                                        <li key={i}>
-                                                            <a href={f.url} target="_blank" rel="noreferrer">
-                                                                {f.name}
-                                                            </a>
-                                                            <br />
-                                                            <small className="text-muted">Stap: {f.stepName}</small>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                                <Button
-                                                    onClick={handleDownloadZip}
-                                                    variant="primary"
-                                                >
-                                                    Download als ZIP
-                                                </Button>
-                                            </>
-                                        ) : (
-                                            <p className="text-muted">Nog geen bestanden geüpload.</p>
-                                        )}
+                                    <Card.Title>Your files</Card.Title>
+                                    {studentFiles.length > 0 ? (
+                                        <>
+                                            <ul className="list-unstyled mb-3">
+                                                {studentFiles.map((f, i) => (
+                                                    <li key={i}>
+                                                        <a href={f.url} target="_blank" rel="noreferrer">
+                                                            {f.name}
+                                                        </a>
+                                                        <br />
+                                                        <small className="text-muted">Step: {f.stepName}</small>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                            <Button
+                                                onClick={handleDownloadZip}
+                                                variant="primary"
+                                            >
+                                                Download as ZIP
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <p className="text-muted">No files uploaded yet.</p>
+                                    )}
                                 </Card.Body>
                             </Card>
                         </div>
@@ -306,9 +306,9 @@ export default function Studentdashboard() {
                                 <div key={proc.id} className="mb-4 list-group-item">
                                     <div>
                                         <h5>{proc.companyName} — {proc.status}</h5>
-                                        Begeleider: {proc.supervisorName}<br />
+                                        Supervisor: {proc.supervisorName}<br />
                                         <small className="text-muted">
-                                            Gestart op: {new Date(proc.createdAt).toLocaleDateString()}
+                                            Started on: {new Date(proc.createdAt).toLocaleDateString()}
                                         </small>
                                     </div>
                                     <ProcessAccordion proc={proc} token={token} />
@@ -321,7 +321,7 @@ export default function Studentdashboard() {
 
             <div className="d-flex justify-content-between align-items-start mt-4">
                 <button className="btn btn-success" onClick={() => setShowModal(true)}>
-                    Nieuw proces starten
+                    Start a new process
                 </button>
             </div>
         </div>

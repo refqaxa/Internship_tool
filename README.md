@@ -1,23 +1,13 @@
-# README TENMPLATE
+# Internship tool
 
-Deze applicatie haalt nieuwsartikelen op via de Event Registry API, voert sentimentanalyse uit met een BERT-model en slaat alleen positieve artikelen op in de database.
-
----
-
-## 📋 **Inhoudsopgave**
-* [Over het project](#over-het-project)
-* [Functies](#Functies)  
-* [Installatie](#installatie)
-* [Configuratie](#configuratie)
-* [Command-line Scripts](#command-line-scripts)  
-* [API Eindpunten](#api-eindpunten)  
-* [Requirements](#Requirements)  
-* [Licentie](#licentie) 
+This is a platform for students and teachers for internship Process
 
 ---
 
-## 🌍 **Over het project**
-Positive News App verzamelt alleen positief nieuws van verschillende bronnen en categoriseert dit automatisch met behulp van Vader voor sentimentanalyse. Gebruikers kunnen zich registreren, artikelen opslaan als favoriet en gepersonaliseerde nieuwsfeeds ontvangen.
+## 📋 **Overviews**
+![API overview](readmeImages/image.png)
+![API overview](readmeImages/image2.png)
+![API overview](readmeImages/image3.png)
 
 ---
 
