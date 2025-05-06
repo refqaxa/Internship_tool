@@ -131,7 +131,7 @@ readmeImages/ # Images for this README
 ## 🧑‍💻 **Team & Credits**
 
 - Refqa
-- # Mika
+- Mika
 - Client: Aventus BPV department
 
 Deadline: 06-05-2025
